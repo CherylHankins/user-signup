@@ -83,12 +83,17 @@ class MainHandler(webapp2.RequestHandler):
         content = page_header + user_name_form + password_form + verify_form + email_form + page_footer
         self.response.write(content)
 
-
+def valid_username(username):
+    if username and username.isalpha():
+        return username
 
 class Username(webapp2.RequestHandler):
     def post(self):
-        sentence = 'Valid username'
-        self.response.write(sentence)
+        user_name = valid_username(self.request.get("username"))
+        if not (user_name):
+            self.response.write('INVALID user name')
+        else:
+            self.response.write('VALID user name')
 
 class Password(webapp2.RequestHandler):
     def post(self):
