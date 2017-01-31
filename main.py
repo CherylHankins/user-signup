@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 import webapp2
+import re
 
 page_header = """
 <!DOCTYPE html>
@@ -39,83 +40,128 @@ page_footer = """
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
-        #form for username
-        user_name_form = """
-        <form action = "/username" method = "post">
-            <label>
-                User name <input type = "text" name = "username">
-            </label>
+        form = """
+        <form action = "/validate" method = "post">
+            <table>
+                <tbody>
+                    <tr>
+                        <td>
+                            <label for = "username">User name</label>
+                        </td>
+                        <td>
+                            <input name = "username" type = "text" value required>
+                            <span class = "error"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for = "password">Password</label>
+                        </td>
+                        <td>
+                            <input name = "password" type = "password" required>
+                            <span class = "error"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for = "verify">Verify Password</label>
+                        </td>
+                        <td>
+                            <input name = "verify" type = "password" required>
+                            <span class = "error"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for = "email">Email (optional)</label>
+                        </td>
+                        <td>
+                            <input name = "email" type = "email" value>
+                            <span class = "error"></span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
             <input type = "submit">
         </form>
-        <br>
         """
-        #form for password
-        password_form = """
-        <form action = "/password" method = "post">
-            <label>
-                Password <input type = "password" name = "password">
-            </label>
-            <input type = "submit">
-            </form>
-        <br>
-        """
-        #form for password verification
-        verify_form = """
-        <form action = "/verify" method = "post">
-            <label>
-                Verify Password <input type = "password" name = "verify">
-            </label>
-            <input type = "submit">
-        </form>
-        <br>
-        """
-        #form for e-mail
-        email_form = """
-        <form action = "/email" method = "post">
-            <label>
-                E-mail (optional) <input type = "text" name = "email">
-            </label>
-            <input type = "submit">
-        </form>
-        """
-        #self.response.write(form)
-        #sentence = 'Hello world'
-        content = page_header + user_name_form + password_form + verify_form + email_form + page_footer
+
+        content = page_header + form + page_footer
         self.response.write(content)
 
-def valid_username(username):
-    if username and username.isalpha():
-        return username
 
-class Username(webapp2.RequestHandler):
+USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
+  def valid_username(username):
+    return USER_RE.match(username)
+
+PASS_RE = re.compile(r"^.{3,20}$")
+    def valid_password(password):
+        return PASS_RE.match(password)
+
+EMAIL_RE = re.compile(r "^[\S]+@[\S]+.[\S]+$")
+    def valid_email(email):
+        return not email or EMAIL_RE.match(email)
+
+
+class Validate(webapp2.RequestHandler):
     def post(self):
         user_name = valid_username(self.request.get("username"))
         if not (user_name):
             self.response.write('INVALID user name')
         else:
-            self.response.write('VALID user name')
+            self.response.write('Welcome, ' + user_name + "!")
 
-class Password(webapp2.RequestHandler):
-    def post(self):
-        sentence = 'Valid password'
-        self.response.write(sentence)
 
-class Verify(webapp2.RequestHandler):
-    def post(self):
-        sentence = 'It matches'
-        self.response.write(sentence)
 
-class Email(webapp2.RequestHandler):
-    def post(self):
-        sentence = 'Thank you'
-        self.response.write(sentence)
+
+
+def valid_username(username):
+    if len(username) > 0:
+        if username and username.isalpha():
+            return username
+
+#class Username(webapp2.RequestHandler):
+    #def post(self):
+        #user_name = valid_username(self.request.get("username"))
+        #if not (user_name):
+            #self.response.write('INVALID user name')
+        #else:
+            #self.response.write('VALID user name')
+
+
+def valid_password(password, verify):
+    if len(password) > 0:
+        password = (self.request.get("password"))
+        verify = (self.request.get("verify"))
+        if password.index == verify.index:
+            return password
+
+#class Password(webapp2.RequestHandler):
+    #    sentence = 'Valid password'
+        #self.response.write(sentence)
+
+#class Verify(webapp2.RequestHandler):
+    #def post(self):
+        #verified = valid_password(self.request.get("password"),(self.request.get("verify")))
+        #if not (verified):
+            #self.response.write("Passwords do not match")
+        #else:
+            #self.response.write('Good Password')
+
+
+#def valid_email(email):
+    #email.find('@')
+    #email.find(.)
+    #if
+
+#class Email(webapp2.RequestHandler):
+    #def post(self):
+        #sentence = 'Thank you'
+        #self.response.write(sentence)
 
 
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
-    ('/username', Username),
-    ('/password', Password),
-    ('/verify', Verify),
-    ('/email', Email),
+
 ], debug=True)
