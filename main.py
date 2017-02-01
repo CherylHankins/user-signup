@@ -22,7 +22,6 @@ page_header = """
 <html>
 <head>
 
-    </style>
 </head>
 <body>
     <h1>
@@ -36,132 +35,122 @@ page_footer = """
 </html>
 """
 
+form = """
+<form method = "post">
+    <table>
+        <tbody>
+            <tr>
+                <td>
+                    <label for = "username">User name</label>
+                </td>
+                <td>
+                    <input name = "username" type = "text" value required>
+                </td>
+                <td>
+                    <div style="color: red">%(error)s</div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for = "password">Password</label>
+                </td>
+                <td>
+                    <input name = "password" type = "password" required>
+                </td>
+                <td>
+                    <div style="color: red">%(error)s</div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for = "verify">Verify Password</label>
+                </td>
+                <td>
+                    <input name = "verify" type = "password" required>
+                </td>
+                <td>
+                    <div style="color: red">%(error)s</div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for = "email">Email (optional)</label>
+                </td>
+                <td>
 
-
-class MainHandler(webapp2.RequestHandler):
-    def get(self):
-        form = """
-        <form action = "/validate" method = "post">
-            <table>
-                <tbody>
-                    <tr>
-                        <td>
-                            <label for = "username">User name</label>
-                        </td>
-                        <td>
-                            <input name = "username" type = "text" value required>
-                            <span class = "error"></span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <label for = "password">Password</label>
-                        </td>
-                        <td>
-                            <input name = "password" type = "password" required>
-                            <span class = "error"></span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <label for = "verify">Verify Password</label>
-                        </td>
-                        <td>
-                            <input name = "verify" type = "password" required>
-                            <span class = "error"></span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <label for = "email">Email (optional)</label>
-                        </td>
-                        <td>
-                            <input name = "email" type = "email" value>
-                            <span class = "error"></span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <input type = "submit">
-        </form>
-        """
-
-        content = page_header + form + page_footer
-        self.response.write(content)
+                    <input name = "email" type = "email" value>
+                </td>
+                <td>
+                    <div style="color: red">%(error)s</div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <input type = "submit">
+</form>
+"""
 
 
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
-  def valid_username(username):
+def valid_username(username):
     return USER_RE.match(username)
 
 PASS_RE = re.compile(r"^.{3,20}$")
-    def valid_password(password):
-        return PASS_RE.match(password)
+def valid_password(password):
+    return PASS_RE.match(password)
 
-EMAIL_RE = re.compile(r "^[\S]+@[\S]+.[\S]+$")
-    def valid_email(email):
-        return not email or EMAIL_RE.match(email)
+EMAIL_RE = re.compile(r"^[\S]+@[\S]+.[\S]+$")
+def valid_email(email):
+    return not email or EMAIL_RE.match(email)
 
 
-class Validate(webapp2.RequestHandler):
+
+class Signup(webapp2.RequestHandler):
+    def get(self):
+        content = page_header + form + page_footer
+        self.response.write(content)
+
+    def write_form(self, error=""):
+        self.response.out.write(form % {"error":error})
+
     def post(self):
-        user_name = valid_username(self.request.get("username"))
-        if not (user_name):
-            self.response.write('INVALID user name')
+        have_error = False
+        username = self.request.get("username")
+        password = self.request.get("password")
+        verify = self.request.get("verify")
+        email = self.request.get("email")
+        welcome_sentence = "<h2>"'Welcome, ' + username + '!'"</h2>"
+        #params = dict('username'=username, 'email'=email)
+
+
+
+        if not valid_username(username):
+            self.write_form("That's not a valid user name.")
+        if not valid_password(password):
+            self.write_form("That wasn't a valid password.")
+        elif password != verify:
+
+            self.write_form ("Your passwords didn't match.")
+        if not valid_email(email):
+
+            self.write_form ("That's not a valid email.")
+        #if have_error:
+            #self.write_form(**params)
+
         else:
-            self.response.write('Welcome, ' + user_name + "!")
+            self.response.out.write(welcome_sentence)
 
 
 
 
 
-def valid_username(username):
-    if len(username) > 0:
-        if username and username.isalpha():
-            return username
-
-#class Username(webapp2.RequestHandler):
-    #def post(self):
-        #user_name = valid_username(self.request.get("username"))
-        #if not (user_name):
-            #self.response.write('INVALID user name')
-        #else:
-            #self.response.write('VALID user name')
 
 
-def valid_password(password, verify):
-    if len(password) > 0:
-        password = (self.request.get("password"))
-        verify = (self.request.get("verify"))
-        if password.index == verify.index:
-            return password
-
-#class Password(webapp2.RequestHandler):
-    #    sentence = 'Valid password'
-        #self.response.write(sentence)
-
-#class Verify(webapp2.RequestHandler):
-    #def post(self):
-        #verified = valid_password(self.request.get("password"),(self.request.get("verify")))
-        #if not (verified):
-            #self.response.write("Passwords do not match")
-        #else:
-            #self.response.write('Good Password')
-
-
-#def valid_email(email):
-    #email.find('@')
-    #email.find(.)
-    #if
-
-#class Email(webapp2.RequestHandler):
-    #def post(self):
-        #sentence = 'Thank you'
-        #self.response.write(sentence)
 
 
 
 app = webapp2.WSGIApplication([
-    ('/', MainHandler),
+    ('/', Signup),
+
 
 ], debug=True)
