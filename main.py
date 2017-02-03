@@ -38,7 +38,7 @@ form = """
                     <label for = "username">User name</label>
                 </td>
                 <td>
-                    <input name = "username" type = "text" >
+                    <input name = "username" type = "text" value = "%(username)s">
                 </td>
                 <td>
                     <div style="color: red">%(e1)s</div>
@@ -72,7 +72,7 @@ form = """
                 </td>
                 <td>
 
-                    <input name = "email" type = "email" >
+                    <input name = "email" type = "email" value = "%(email)s">
                 </td>
                 <td>
                     <div style="color: red">%(e4)s</div>
@@ -107,9 +107,8 @@ def valid_email(email):
 
 class Signup(webapp2.RequestHandler):
     def write_form(self,error = dict(),username = "", password = "", verify = "", email = ""):
-        response = {"e1":error.get("e1", ""), "e2":error.get("e2",""), "e3":error.get("e3",""), "e4":error.get("e4","")}
+        response = {"username":username, "email":email,"e1":error.get("e1", ""), "e2":error.get("e2",""), "e3":error.get("e3",""), "e4":error.get("e4","")}
         self.response.out.write(form % response)
-        #self.response.out.write(form % {"error":error, "username":username, "password":password, "verify":verify, "email":email})
 
     def get(self):
         content = page_header + form + page_footer
@@ -132,19 +131,14 @@ class Signup(webapp2.RequestHandler):
 
         if not valid_username(username):
             errors ["e1"] = e1
-            #self.write_form (e1 %{'error':username})
         if not valid_password(password):
             errors ["e2"] = e2
-            #self.write_form (e3 %{'error':verify})
         elif password != verify:
             errors ["e3"] = e3
-            #self.write_form ("Your passwords didn't match.")
         if not valid_email(email):
             errors ["e4"] = e4
-            #self.write_form (e4 %{'error':email})
-            #self.write_form(errors)
         if errors:
-            self.write_form(errors)
+            self.write_form(errors, username = username, email = email)
 
         else:
             self.response.out.write(welcome_sentence)
