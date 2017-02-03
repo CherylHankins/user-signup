@@ -38,10 +38,10 @@ form = """
                     <label for = "username">User name</label>
                 </td>
                 <td>
-                    <input name = "username" type = "text" value required>
+                    <input name = "username" type = "text" >
                 </td>
                 <td>
-                    <div style="color: red">%(error)s</div>
+                    <div style="color: red">%(e1)s</div>
                 </td>
             </tr>
             <tr>
@@ -49,10 +49,10 @@ form = """
                     <label for = "password">Password</label>
                 </td>
                 <td>
-                    <input name = "password" type = "password" required>
+                    <input name = "password" type = "password" >
                 </td>
                 <td>
-                    <div style="color: red">%(error)s</div>
+                    <div style="color: red">%(e2)s</div>
                 </td>
             </tr>
             <tr>
@@ -60,10 +60,10 @@ form = """
                     <label for = "verify">Verify Password</label>
                 </td>
                 <td>
-                    <input name = "verify" type = "password" required>
+                    <input name = "verify" type = "password" >
                 </td>
                 <td>
-                    <div style="color: red">%(error)s</div>
+                    <div style="color: red">%(e3)s</div>
                 </td>
             </tr>
             <tr>
@@ -72,10 +72,10 @@ form = """
                 </td>
                 <td>
 
-                    <input name = "email" type = "email" value>
+                    <input name = "email" type = "email" >
                 </td>
                 <td>
-                    <div style="color: red">%(error)s</div>
+                    <div style="color: red">%(e4)s</div>
                 </td>
             </tr>
         </tbody>
@@ -106,28 +106,45 @@ def valid_email(email):
 
 
 class Signup(webapp2.RequestHandler):
+    def write_form(self,error = dict(),username = "", password = "", verify = "", email = ""):
+        response = {"e1":error.get("e1", ""), "e2":error.get("e2",""), "e3":error.get("e3",""), "e4":error.get("e4","")}
+        self.response.out.write(form % response)
+        #self.response.out.write(form % {"error":error, "username":username, "password":password, "verify":verify, "email":email})
+
     def get(self):
         content = page_header + form + page_footer
         self.response.write(content)
-
-    def write_form(self, error=""):
-        self.response.out.write(form % {"error":error})
 
     def post(self):
         username = self.request.get("username")
         password = self.request.get("password")
         verify = self.request.get("verify")
         email = self.request.get("email")
+
         welcome_sentence = "<h2>"'Welcome, ' + username + '!'"</h2>"
 
+        e1 = "That's not a valid username"
+        e2 = "That wasn't a valid password."
+        e3 = "Your passwords didn't match."
+        e4 = "That's not a valid email."
+
+        errors = dict()
+
         if not valid_username(username):
-            self.write_form("That's not a valid user name.")
+            errors ["e1"] = e1
+            #self.write_form (e1 %{'error':username})
         if not valid_password(password):
-            self.write_form("That wasn't a valid password.")
+            errors ["e2"] = e2
+            #self.write_form (e3 %{'error':verify})
         elif password != verify:
-            self.write_form ("Your passwords didn't match.")
+            errors ["e3"] = e3
+            #self.write_form ("Your passwords didn't match.")
         if not valid_email(email):
-            self.write_form ("That's not a valid email.")
+            errors ["e4"] = e4
+            #self.write_form (e4 %{'error':email})
+            #self.write_form(errors)
+        if errors:
+            self.write_form(errors)
 
         else:
             self.response.out.write(welcome_sentence)
