@@ -111,7 +111,8 @@ class Signup(webapp2.RequestHandler):
         self.response.out.write(form % response)
 
     def get(self):
-        content = page_header + form + page_footer
+        response = {"username":"", "email":"", "e1":"", "e2":"", "e3":"", "e4":""}
+        content = page_header + form % response + page_footer
         self.response.write(content)
 
     def post(self):
